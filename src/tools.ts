@@ -26,6 +26,10 @@ export const tools: Tool[] = [
           items: { type: 'number' },
           description: 'Array of priority IDs to filter by',
         },
+        appId: {
+          type: 'string',
+          description: 'Optional: TeamDynamix application ID to search in (overrides default)',
+        },
       },
     },
   },
@@ -38,6 +42,10 @@ export const tools: Tool[] = [
         ticketId: {
           type: 'number',
           description: 'ID of the ticket to retrieve',
+        },
+        appId: {
+          type: 'string',
+          description: 'Optional: TeamDynamix application ID (overrides default and auto-detection)',
         },
       },
       required: ['ticketId'],
@@ -56,6 +64,10 @@ export const tools: Tool[] = [
         ticketData: {
           type: 'object',
           description: 'Complete ticket data for update',
+        },
+        appId: {
+          type: 'string',
+          description: 'Optional: TeamDynamix application ID (overrides default and auto-detection)',
         },
       },
       required: ['ticketId', 'ticketData'],
@@ -91,6 +103,19 @@ export const tools: Tool[] = [
           type: 'string',
           description: 'Comments to add to the ticket update',
         },
+        responsibleUid: {
+          type: 'string',
+          description: 'UID of the person to assign the ticket to',
+        },
+        tags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Array of tags to apply to the ticket',
+        },
+        appId: {
+          type: 'string',
+          description: 'Optional: TeamDynamix application ID (overrides default and auto-detection)',
+        },
       },
       required: ['ticketId'],
     },
@@ -119,8 +144,58 @@ export const tools: Tool[] = [
           items: { type: 'string' },
           description: 'Array of email addresses to notify',
         },
+        appId: {
+          type: 'string',
+          description: 'Optional: TeamDynamix application ID (overrides default and auto-detection)',
+        },
       },
       required: ['ticketId', 'comments'],
+    },
+  },
+  {
+    name: 'tdx_add_ticket_tags',
+    description: 'Add tags to a TeamDynamix ticket. Note: Tags are stored but not returned in GET responses due to API limitations.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        ticketId: {
+          type: 'number',
+          description: 'ID of the ticket to add tags to',
+        },
+        tags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Array of tag names to add to the ticket',
+        },
+        appId: {
+          type: 'string',
+          description: 'Optional: TeamDynamix application ID (overrides default and auto-detection)',
+        },
+      },
+      required: ['ticketId', 'tags'],
+    },
+  },
+  {
+    name: 'tdx_delete_ticket_tags',
+    description: 'Delete tags from a TeamDynamix ticket',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        ticketId: {
+          type: 'number',
+          description: 'ID of the ticket to delete tags from',
+        },
+        tags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Array of tag names to delete from the ticket',
+        },
+        appId: {
+          type: 'string',
+          description: 'Optional: TeamDynamix application ID (overrides default and auto-detection)',
+        },
+      },
+      required: ['ticketId', 'tags'],
     },
   },
   {
@@ -133,6 +208,10 @@ export const tools: Tool[] = [
           type: 'number',
           description: 'Maximum number of results to return (default: 100)',
           default: 100,
+        },
+        appId: {
+          type: 'string',
+          description: 'Optional: TeamDynamix application ID (overrides default)',
         },
       },
     },
@@ -152,6 +231,10 @@ export const tools: Tool[] = [
           description: 'Maximum number of results to return (default: 50)',
           default: 50,
         },
+        appId: {
+          type: 'string',
+          description: 'Optional: TeamDynamix application ID (overrides default)',
+        },
       },
       required: ['searchText'],
     },
@@ -165,6 +248,20 @@ export const tools: Tool[] = [
         reportId: {
           type: 'number',
           description: 'ID of the report to run',
+        },
+        appId: {
+          type: 'string',
+          description: 'Optional: TeamDynamix application ID (overrides default)',
+        },
+        withData: {
+          type: 'boolean',
+          description: 'Optional: Include report data in response (default: false)',
+          default: false,
+        },
+        dataSortExpression: {
+          type: 'string',
+          description: 'Optional: Sort expression for report data',
+          default: '',
         },
       },
       required: ['reportId'],
