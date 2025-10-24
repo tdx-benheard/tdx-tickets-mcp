@@ -25,8 +25,8 @@ export class TDXAuth {
     const response = await axios.post(
       `${this.config.baseUrl}/api/auth`,
       {
-        username: this.config.username,
-        password: this.config.password
+        UserName: this.config.username,
+        Password: this.config.password
       },
       {
         headers: {

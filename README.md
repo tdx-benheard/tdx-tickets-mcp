@@ -1,63 +1,163 @@
-# TeamDynamix API MCP Server
+# TeamDynamix Tickets API MCP Server
 
-An MCP (Model Context Protocol) server for interacting with the TeamDynamix Web API. This server provides tools for managing tickets, time entries, people, groups, and running reports through the TeamDynamix platform.
+An MCP (Model Context Protocol) server for interacting with the TeamDynamix Web API. This server provides tools for managing tickets, people, groups, and running reports through the TeamDynamix platform.
+
+## Prerequisites
+
+- **Node.js** 18+ and npm installed
+- Access to a TeamDynamix instance with valid credentials
+- **Claude Desktop** or **Claude Code** (VS Code extension) installed
 
 ## Setup
 
-1. Install dependencies:
+1. **Clone or download this repository** to your local machine
+
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Build the project:
+3. Build the project:
 ```bash
 npm run build
 ```
 
-3. Configure credentials:
+4. **Create credential files**:
 
-   **Option A: Credential Files (Recommended)**
-   - Create `~/.config/tdx/prod-credentials.json` with your credentials
-   - See CLAUDE.md for full configuration details
+   Create a directory for credentials (if it doesn't exist):
+   - **Windows**: `C:\Users\YourUsername\.config\tdx\`
+   - **macOS/Linux**: `~/.config/tdx/`
 
-   **Option B: .env File (Legacy)**
-   - Copy `.env.example` to `.env`
-   - Edit `.env` and fill in your TeamDynamix credentials
+   Create credential JSON file(s):
 
-4. Configure in Claude Desktop/Code:
-**Claude Desktop** (`claude_desktop_config.json`):
-```json
-{
-  "mcpServers": {
-    "tdx-api-mcp": {
-      "command": "node",
-      "args": ["c:/source/mcp/tdx-api-mcp/dist/index.js"],
-      "cwd": "c:/source/mcp/tdx-api-mcp",
-      "env": {
-        "TDX_CREDENTIALS_FILE": "C:\\Users\\[username]\\.config\\tdx\\prod-credentials.json"
-      }
-    }
-  }
-}
-```
+   **Production** (`prod-credentials.json`):
+   ```json
+   {
+     "TDX_BASE_URL": "https://your-instance.teamdynamix.com/TDWebApi",
+     "TDX_USERNAME": "your.username@example.com",
+     "TDX_PASSWORD": "your-password",
+     "TDX_TICKET_APP_IDS": "129"
+   }
+   ```
 
-**Claude Code** (`~/.claude.json`):
-```json
-{
-  "mcpServers": {
-    "tdx-api-mcp": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["C:/source/mcp/tdx-api-mcp/dist/index.js"],
-      "env": {
-        "TDX_CREDENTIALS_FILE": "C:\\Users\\[username]\\.config\\tdx\\prod-credentials.json"
-      }
-    }
-  }
-}
-```
+   **Development** (optional - `dev-credentials.json`):
+   ```json
+   {
+     "TDX_BASE_URL": "http://localhost/TDDev/TDWebApi",
+     "TDX_USERNAME": "your-dev-username",
+     "TDX_PASSWORD": "your-dev-password",
+     "TDX_TICKET_APP_IDS": "627"
+   }
+   ```
 
-See [CLAUDE.md](./CLAUDE.md) for detailed configuration including multiple environments.
+   **Important Notes:**
+   - Replace `your-instance.teamdynamix.com` with your actual TeamDynamix instance URL
+   - `TDX_BASE_URL` must include `/TDWebApi` at the end
+   - To find your **App ID**: Open a ticket in TeamDynamix and check the URL (e.g., `/Apps/129/Tickets/...` - the number after `/Apps/` is your App ID)
+   - You can specify multiple app IDs separated by commas: `"129,2,11"`
+   - If you only need one environment, just create `prod-credentials.json`
+
+5. **Configure Claude Desktop or Claude Code**:
+
+   You can configure the MCP server at different scopes:
+
+   ### Option A: User-Level Configuration (Global)
+
+   Available for all projects when you open Claude.
+
+   **For Claude Desktop:**
+
+   Find and edit `claude_desktop_config.json`:
+   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+   Add this configuration (replace paths with your actual paths):
+   ```json
+   {
+     "mcpServers": {
+       "tdx-api-tickets-mcp": {
+         "command": "node",
+         "args": ["/absolute/path/to/tdx-api-tickets-mcp/dist/index.js"],
+         "cwd": "/absolute/path/to/tdx-api-tickets-mcp",
+         "env": {
+           "TDX_PROD_CREDENTIALS_FILE": "/absolute/path/to/.config/tdx/prod-credentials.json",
+           "TDX_DEV_CREDENTIALS_FILE": "/absolute/path/to/.config/tdx/dev-credentials.json",
+           "TDX_DEFAULT_ENVIRONMENT": "prod"
+         }
+       }
+     }
+   }
+   ```
+
+   **For Claude Code (User-Level):**
+
+   Edit `~/.claude.json` (creates automatically when you install Claude Code):
+   ```json
+   {
+     "mcpServers": {
+       "tdx-api-tickets-mcp": {
+         "type": "stdio",
+         "command": "node",
+         "args": ["/absolute/path/to/tdx-api-tickets-mcp/dist/index.js"],
+         "env": {
+           "TDX_PROD_CREDENTIALS_FILE": "/absolute/path/to/.config/tdx/prod-credentials.json",
+           "TDX_DEV_CREDENTIALS_FILE": "/absolute/path/to/.config/tdx/dev-credentials.json",
+           "TDX_DEFAULT_ENVIRONMENT": "prod"
+         }
+       }
+     }
+   }
+   ```
+
+   ### Option B: Project-Level Configuration (Recommended for Development)
+
+   Only available when Claude Code is opened in that specific project directory.
+
+   **For Claude Code (Project-Level):**
+
+   Create a `.clauderc` file in your **project root directory**:
+   ```json
+   {
+     "mcpServers": {
+       "tdx-api-tickets-mcp": {
+         "type": "stdio",
+         "command": "node",
+         "args": ["/absolute/path/to/tdx-api-tickets-mcp/dist/index.js"],
+         "env": {
+           "TDX_PROD_CREDENTIALS_FILE": "/absolute/path/to/.config/tdx/prod-credentials.json",
+           "TDX_DEV_CREDENTIALS_FILE": "/absolute/path/to/.config/tdx/dev-credentials.json",
+           "TDX_DEFAULT_ENVIRONMENT": "prod"
+         }
+       }
+     }
+   }
+   ```
+
+   **Benefits of project-level configuration:**
+   - Only loads when working in that project
+   - Can use different MCP servers for different projects
+   - Can be committed to git (but **never commit credential files!**)
+   - Team members can use the same MCP server configuration
+
+   **Important:** Add `.clauderc` to your project's `.gitignore` if it contains any sensitive paths or information.
+
+   ---
+
+   **Path Examples:**
+   - Windows: `"C:\\Users\\YourUsername\\projects\\tdx-api-tickets-mcp\\dist\\index.js"`
+   - macOS/Linux: `"/Users/yourname/projects/tdx-api-tickets-mcp/dist/index.js"`
+
+   **Notes:**
+   - Use absolute paths (not relative like `./` or `../`)
+   - On Windows, use double backslashes `\\` or forward slashes `/`
+   - If you only have production credentials, omit `TDX_DEV_CREDENTIALS_FILE`
+   - Project-level config (`.clauderc`) takes precedence over user-level config
+
+6. **Restart Claude Desktop/Code** to load the new MCP server
+
+7. **Verify installation**: In Claude, try asking "List available TeamDynamix reports" - if configured correctly, the server will respond with your reports.
+
+See [CLAUDE.md](./CLAUDE.md) for detailed configuration, troubleshooting, and advanced features.
 
 ## Security
 
@@ -76,12 +176,17 @@ Credentials are stored outside the project directory:
 
 ## Available Tools
 
+**Environment Selection:** All tools support an optional `environment` parameter:
+- `environment` (string, optional): Environment to use - "prod" or "dev" (defaults to "prod")
+- Example: `{ ticketId: 12345, environment: "dev" }` to use development environment
+
 ### Ticket Management
 
 #### `tdx_search_tickets`
 Search for TeamDynamix tickets using various criteria.
 
 **Parameters:**
+- `environment` (string, optional): Environment to use - "prod" or "dev" (default: "prod")
 - `searchText` (string, optional): Text to search for in tickets
 - `maxResults` (number, optional): Maximum number of results to return (default: 50)
 - `statusIds` (array of numbers, optional): Array of status IDs to filter by
@@ -280,102 +385,6 @@ List all available TeamDynamix groups.
 
 ---
 
-### Time & Expense Management
-
-#### `tdx_search_time_entries`
-Search for TeamDynamix time entries using various criteria.
-
-**Parameters:**
-- `startDate` (string, optional): Start date for time entries (ISO 8601 format: YYYY-MM-DD)
-- `endDate` (string, optional): End date for time entries (ISO 8601 format: YYYY-MM-DD)
-- `userUid` (string, optional): UID of user to search time entries for
-- `ticketId` (number, optional): Ticket ID to filter time entries by
-- `projectId` (number, optional): Project ID to filter time entries by
-- `maxResults` (number, optional): Maximum number of results to return (default: 50)
-
----
-
-#### `tdx_get_time_entry`
-Get a TeamDynamix time entry by ID.
-
-**Parameters:**
-- `timeEntryId` (number, required): ID of the time entry to retrieve
-
----
-
-#### `tdx_create_time_entry`
-Create a new TeamDynamix time entry.
-
-**Parameters:**
-- `timeEntryData` (object, required): Time entry data including hours, date, description, etc.
-
-**Common Time Entry Fields:**
-```javascript
-{
-  DateWorked: "2025-10-15",      // Required: Date in ISO format
-  Minutes: 120,                   // Required: Duration in minutes
-  TimeTypeID: 3406,              // Required: Time type ID
-  Description: "Work description",
-
-  // Component association (at least one required)
-  TicketID: 555058,              // Associate with ticket
-  ProjectID: 12345,              // Associate with project
-
-  // Optional fields
-  BillTo: "Client name",
-  BillRate: 100.00,
-  IsBillable: true,
-  IsActive: true
-}
-```
-
----
-
-#### `tdx_update_time_entry`
-Update an existing TeamDynamix time entry.
-
-**Parameters:**
-- `timeEntryId` (number, required): ID of the time entry to update
-- `timeEntryData` (object, required): Updated time entry data
-
----
-
-#### `tdx_delete_time_entry`
-Delete a TeamDynamix time entry.
-
-**Parameters:**
-- `timeEntryId` (number, required): ID of the time entry to delete
-
-**Note:** Time entries can only be deleted by the user who created them or an Admin Service Account.
-
----
-
-#### `tdx_get_time_report`
-Get weekly time report (timesheet) for a user.
-
-**Parameters:**
-- `reportDate` (string, required): Any date within the week to get report for (ISO 8601 format: YYYY-MM-DD)
-- `userUid` (string, optional): UID of user to get report for (defaults to current user)
-
-**Note:** The report returns timesheet data for the entire week containing the specified date.
-
----
-
-#### `tdx_list_time_types`
-List all active time types.
-
-**Parameters:** None
-
----
-
-#### `tdx_get_time_type`
-Get a specific time type by ID.
-
-**Parameters:**
-- `timeTypeId` (number, required): ID of the time type to retrieve
-
----
-
 ### Report Management
 
 #### `tdx_list_reports`
@@ -417,7 +426,7 @@ Run a TeamDynamix report by ID and get the results.
 
 ### Project Structure
 ```
-tdx-api-mcp/
+tdx-api-tickets-mcp/
 ├── src/
 │   ├── index.ts      # Main server entry point
 │   ├── client.ts     # TDX API client
@@ -441,7 +450,7 @@ tdx-api-mcp/
 npm run test:api
 
 # Test production environment
-npx tsx src/test-prod.ts
+npm run test:prod
 ```
 
 Tests validate:
@@ -496,17 +505,6 @@ The server interacts with the following TeamDynamix API endpoints:
 **Groups:**
 - `POST /api/groups/search` - Search/list groups
 - `GET /api/groups/{id}` - Get group by ID
-
-**Time & Expense:**
-- `POST /api/time/search` - Search time entries
-- `GET /api/time/{id}` - Get time entry
-- `POST /api/time` - Create time entries (bulk)
-- `PUT /api/time/{id}` - Update time entry
-- `DELETE /api/time/{id}` - Delete time entry
-- `GET /api/time/report/{reportDate}` - Get time report (current user)
-- `GET /api/time/report/{reportDate}/{uid}` - Get time report (specific user)
-- `GET /api/time/types` - List time types
-- `GET /api/time/types/{id}` - Get time type
 
 ## Additional Documentation
 

@@ -1,7 +1,7 @@
 {
-  "name": "tdx-api-mcp",
+  "name": "tdx-api-tickets-mcp",
   "version": "1.0.0",
-  "description": "MCP server for TeamDynamix API integration",
+  "description": "MCP server for TeamDynamix Tickets, Reports, Users, and Groups API",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
@@ -9,9 +9,7 @@
     "dev": "tsc --watch",
     "start": "node dist/index.js",
     "test:api": "tsx src/test.ts",
-    "test:status": "tsx src/test-status-update.ts",
-    "test:patch": "tsx src/test-patch-update.ts",
-    "test:change": "tsx src/test-status-change.ts"
+    "test:prod": "tsx src/test-prod.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",

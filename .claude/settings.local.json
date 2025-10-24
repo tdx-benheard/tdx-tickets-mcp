@@ -34,7 +34,9 @@
       "Read(//c/source/tddev/**)",
       "Bash(git log:*)",
       "Bash(npm run test:*)",
-      "mcp__tdx-api-mcp-dev__tdx_get_current_user"
+      "mcp__tdx-api-mcp-dev__tdx_get_current_user",
+      "Read(//c/source/mcp/**)",
+      "Bash(npm run test:prod:*)"
     ],
     "deny": [],
     "ask": []

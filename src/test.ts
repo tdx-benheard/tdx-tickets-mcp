@@ -29,8 +29,15 @@ if (existsSync(envPath)) {
 
 const TDX_BASE_URL = process.env.TDX_BASE_URL || '';
 const TDX_USERNAME = process.env.TDX_USERNAME || '';
-const TDX_PASSWORD = process.env.TDX_PASSWORD || '';
+let TDX_PASSWORD = process.env.TDX_PASSWORD || '';
 const TDX_TICKET_APP_IDS = process.env.TDX_TICKET_APP_IDS || '';
+
+// Decode base64 password if prefixed with "base64:"
+if (TDX_PASSWORD.startsWith('base64:')) {
+  const encodedPassword = TDX_PASSWORD.substring(7); // Remove "base64:" prefix
+  TDX_PASSWORD = Buffer.from(encodedPassword, 'base64').toString('utf8');
+  console.log('Decoded base64-encoded password');
+}
 
 if (!TDX_BASE_URL || !TDX_USERNAME || !TDX_PASSWORD || !TDX_TICKET_APP_IDS) {
   console.error('❌ Missing required environment variables');

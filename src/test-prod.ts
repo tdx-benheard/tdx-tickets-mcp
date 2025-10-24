@@ -15,8 +15,15 @@ const credentials = JSON.parse(readFileSync(credPath, 'utf8'));
 
 const TDX_BASE_URL = credentials.TDX_BASE_URL || '';
 const TDX_USERNAME = credentials.TDX_USERNAME || '';
-const TDX_PASSWORD = credentials.TDX_PASSWORD || '';
+let TDX_PASSWORD = credentials.TDX_PASSWORD || '';
 const TDX_TICKET_APP_IDS = credentials.TDX_TICKET_APP_IDS || '';
+
+// Decode base64 password if prefixed with "base64:"
+if (TDX_PASSWORD.startsWith('base64:')) {
+  const encodedPassword = TDX_PASSWORD.substring(7); // Remove "base64:" prefix
+  TDX_PASSWORD = Buffer.from(encodedPassword, 'base64').toString('utf8');
+  console.log('Decoded base64-encoded password');
+}
 
 if (!TDX_BASE_URL || !TDX_USERNAME || !TDX_PASSWORD || !TDX_TICKET_APP_IDS) {
   console.error('❌ Missing required fields in credentials file');

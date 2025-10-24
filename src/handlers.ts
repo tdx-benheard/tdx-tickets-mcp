@@ -1,9 +1,25 @@
 import { TDXClient } from './client.js';
 
 export class ToolHandlers {
-  constructor(private tdxClient: TDXClient) {}
+  constructor(
+    private tdxClients: Map<string, TDXClient>,
+    private defaultEnvironment: string
+  ) {}
+
+  // Get the appropriate client based on environment parameter
+  private getClient(environment?: string): TDXClient {
+    const env = environment || this.defaultEnvironment;
+    const client = this.tdxClients.get(env);
+
+    if (!client) {
+      throw new Error(`Environment '${env}' not configured. Available: ${Array.from(this.tdxClients.keys()).join(', ')}`);
+    }
+
+    return client;
+  }
 
   async handleSearchTickets(args: any) {
+    const client = this.getClient(args?.environment);
     const searchParams: any = {};
 
     if (args?.searchText) searchParams.SearchText = args.searchText;
@@ -11,7 +27,7 @@ export class ToolHandlers {
     if (args?.statusIds) searchParams.StatusIDs = args.statusIds;
     if (args?.priorityIds) searchParams.PriorityIDs = args.priorityIds;
 
-    const results = await this.tdxClient.searchTickets(searchParams, args?.appId);
+    const results = await client.searchTickets(searchParams, args?.appId);
     return {
       content: [
         {
@@ -23,11 +39,12 @@ export class ToolHandlers {
   }
 
   async handleGetTicket(args: any) {
+    const client = this.getClient(args?.environment);
     if (!args?.ticketId) {
       throw new Error('ticketId is required');
     }
 
-    const ticket = await this.tdxClient.getTicket(args.ticketId as number, args?.appId);
+    const ticket = await client.getTicket(args.ticketId as number, args?.appId);
     return {
       content: [
         {
@@ -39,11 +56,12 @@ export class ToolHandlers {
   }
 
   async handleEditTicket(args: any) {
+    const client = this.getClient(args?.environment);
     if (!args?.ticketId || !args?.ticketData) {
       throw new Error('ticketId and ticketData are required');
     }
 
-    const result = await this.tdxClient.editTicket(args.ticketId as number, args.ticketData, args?.appId);
+    const result = await client.editTicket(args.ticketId as number, args.ticketData, args?.appId);
     return {
       content: [
         {
@@ -55,6 +73,7 @@ export class ToolHandlers {
   }
 
   async handleUpdateTicket(args: any) {
+    const client = this.getClient(args?.environment);
     if (!args?.ticketId) {
       throw new Error('ticketId is required');
     }
@@ -69,7 +88,7 @@ export class ToolHandlers {
     if (args.responsibleUid) updateData.ResponsibleUid = args.responsibleUid;
     if (args.tags) updateData.Tags = args.tags;
 
-    const result = await this.tdxClient.updateTicket(args.ticketId as number, updateData, args?.appId);
+    const result = await client.updateTicket(args.ticketId as number, updateData, args?.appId);
     return {
       content: [
         {
@@ -81,6 +100,7 @@ export class ToolHandlers {
   }
 
   async handleAddTicketFeed(args: any) {
+    const client = this.getClient(args?.environment);
     if (!args?.ticketId || !args?.comments) {
       throw new Error('ticketId and comments are required');
     }
@@ -92,7 +112,7 @@ export class ToolHandlers {
 
     if (args.notify) feedEntry.Notify = args.notify;
 
-    const result = await this.tdxClient.addTicketFeedEntry(args.ticketId as number, feedEntry, args?.appId);
+    const result = await client.addTicketFeedEntry(args.ticketId as number, feedEntry, args?.appId);
     return {
       content: [
         {
@@ -104,11 +124,12 @@ export class ToolHandlers {
   }
 
   async handleAddTicketTags(args: any) {
+    const client = this.getClient(args?.environment);
     if (!args?.ticketId || !args?.tags) {
       throw new Error('ticketId and tags are required');
     }
 
-    const result = await this.tdxClient.addTicketTags(args.ticketId as number, args.tags, args?.appId);
+    const result = await client.addTicketTags(args.ticketId as number, args.tags, args?.appId);
     return {
       content: [
         {
@@ -120,11 +141,12 @@ export class ToolHandlers {
   }
 
   async handleDeleteTicketTags(args: any) {
+    const client = this.getClient(args?.environment);
     if (!args?.ticketId || !args?.tags) {
       throw new Error('ticketId and tags are required');
     }
 
-    const result = await this.tdxClient.deleteTicketTags(args.ticketId as number, args.tags, args?.appId);
+    const result = await client.deleteTicketTags(args.ticketId as number, args.tags, args?.appId);
     return {
       content: [
         {
@@ -136,8 +158,9 @@ export class ToolHandlers {
   }
 
   async handleListReports(args: any) {
+    const client = this.getClient(args?.environment);
     const maxResults = args?.maxResults || 100;
-    const reports = await this.tdxClient.listReports(maxResults, args?.appId);
+    const reports = await client.listReports(maxResults, args?.appId);
     return {
       content: [
         {
@@ -149,12 +172,13 @@ export class ToolHandlers {
   }
 
   async handleSearchReports(args: any) {
+    const client = this.getClient(args?.environment);
     if (!args?.searchText) {
       throw new Error('searchText is required');
     }
 
     const maxResults = args.maxResults || 50;
-    const reports = await this.tdxClient.searchReports(args.searchText, maxResults, args?.appId);
+    const reports = await client.searchReports(args.searchText, maxResults, args?.appId);
     return {
       content: [
         {
@@ -166,11 +190,12 @@ export class ToolHandlers {
   }
 
   async handleRunReport(args: any) {
+    const client = this.getClient(args?.environment);
     if (!args?.reportId) {
       throw new Error('reportId is required');
     }
 
-    const results = await this.tdxClient.runReport(
+    const results = await client.runReport(
       args.reportId as number,
       args?.appId,
       args?.withData || false,
@@ -187,11 +212,12 @@ export class ToolHandlers {
   }
 
   async handleGetUser(args: any) {
+    const client = this.getClient(args?.environment);
     if (!args?.uid && !args?.username) {
       throw new Error('Either uid or username is required');
     }
 
-    const user = await this.tdxClient.getUser(args?.uid, args?.username);
+    const user = await client.getUser(args?.uid, args?.username);
     return {
       content: [
         {
@@ -203,7 +229,8 @@ export class ToolHandlers {
   }
 
   async handleGetCurrentUser(args: any) {
-    const user = await this.tdxClient.getCurrentUser();
+    const client = this.getClient(args?.environment);
+    const user = await client.getCurrentUser();
     return {
       content: [
         {
@@ -215,10 +242,11 @@ export class ToolHandlers {
   }
 
   async handleSearchUsers(args: any) {
+    const client = this.getClient(args?.environment);
     const searchText = args?.searchText || '';
     const maxResults = args?.maxResults || 50;
 
-    const users = await this.tdxClient.searchUsers(searchText, maxResults);
+    const users = await client.searchUsers(searchText, maxResults);
     return {
       content: [
         {
@@ -230,11 +258,12 @@ export class ToolHandlers {
   }
 
   async handleGetUserUid(args: any) {
+    const client = this.getClient(args?.environment);
     if (!args?.username) {
       throw new Error('username is required');
     }
 
-    const uid = await this.tdxClient.getUserUid(args.username);
+    const uid = await client.getUserUid(args.username);
     return {
       content: [
         {
@@ -246,10 +275,11 @@ export class ToolHandlers {
   }
 
   async handleSearchGroups(args: any) {
+    const client = this.getClient(args?.environment);
     const searchText = args?.searchText || '';
     const maxResults = args?.maxResults || 50;
 
-    const groups = await this.tdxClient.searchGroups(searchText, maxResults);
+    const groups = await client.searchGroups(searchText, maxResults);
     return {
       content: [
         {
@@ -261,11 +291,12 @@ export class ToolHandlers {
   }
 
   async handleGetGroup(args: any) {
+    const client = this.getClient(args?.environment);
     if (!args?.groupId) {
       throw new Error('groupId is required');
     }
 
-    const group = await this.tdxClient.getGroup(args.groupId as number);
+    const group = await client.getGroup(args.groupId as number);
     return {
       content: [
         {
@@ -277,145 +308,15 @@ export class ToolHandlers {
   }
 
   async handleListGroups(args: any) {
+    const client = this.getClient(args?.environment);
     const maxResults = args?.maxResults || 100;
 
-    const groups = await this.tdxClient.listGroups(maxResults);
+    const groups = await client.listGroups(maxResults);
     return {
       content: [
         {
           type: 'text',
           text: JSON.stringify(groups, null, 2),
-        },
-      ],
-    };
-  }
-
-  // Time API Handlers
-
-  async handleSearchTimeEntries(args: any) {
-    const searchParams: any = {};
-
-    if (args?.startDate) searchParams.StartDate = args.startDate;
-    if (args?.endDate) searchParams.EndDate = args.endDate;
-    if (args?.userUid) searchParams.UserUid = args.userUid;
-    if (args?.ticketId) searchParams.TicketID = args.ticketId;
-    if (args?.projectId) searchParams.ProjectID = args.projectId;
-    if (args?.maxResults) searchParams.MaxResults = args.maxResults;
-
-    const timeEntries = await this.tdxClient.searchTimeEntries(searchParams);
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(timeEntries, null, 2),
-        },
-      ],
-    };
-  }
-
-  async handleGetTimeEntry(args: any) {
-    if (!args?.timeEntryId) {
-      throw new Error('timeEntryId is required');
-    }
-
-    const timeEntry = await this.tdxClient.getTimeEntry(args.timeEntryId as number);
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(timeEntry, null, 2),
-        },
-      ],
-    };
-  }
-
-  async handleCreateTimeEntry(args: any) {
-    if (!args?.timeEntryData) {
-      throw new Error('timeEntryData is required');
-    }
-
-    const result = await this.tdxClient.createTimeEntry(args.timeEntryData);
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(result, null, 2),
-        },
-      ],
-    };
-  }
-
-  async handleUpdateTimeEntry(args: any) {
-    if (!args?.timeEntryId || !args?.timeEntryData) {
-      throw new Error('timeEntryId and timeEntryData are required');
-    }
-
-    const result = await this.tdxClient.updateTimeEntry(args.timeEntryId as number, args.timeEntryData);
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(result, null, 2),
-        },
-      ],
-    };
-  }
-
-  async handleDeleteTimeEntry(args: any) {
-    if (!args?.timeEntryId) {
-      throw new Error('timeEntryId is required');
-    }
-
-    await this.tdxClient.deleteTimeEntry(args.timeEntryId as number);
-    return {
-      content: [
-        {
-          type: 'text',
-          text: 'Time entry deleted successfully.',
-        },
-      ],
-    };
-  }
-
-  async handleGetTimeReport(args: any) {
-    if (!args?.reportDate) {
-      throw new Error('reportDate is required');
-    }
-
-    const report = await this.tdxClient.getTimeReport(args.reportDate, args?.userUid);
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(report, null, 2),
-        },
-      ],
-    };
-  }
-
-  async handleListTimeTypes(args: any) {
-    const timeTypes = await this.tdxClient.listTimeTypes();
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(timeTypes, null, 2),
-        },
-      ],
-    };
-  }
-
-  async handleGetTimeType(args: any) {
-    if (!args?.timeTypeId) {
-      throw new Error('timeTypeId is required');
-    }
-
-    const timeType = await this.tdxClient.getTimeType(args.timeTypeId as number);
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(timeType, null, 2),
         },
       ],
     };
