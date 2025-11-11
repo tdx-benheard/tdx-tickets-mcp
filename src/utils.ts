@@ -2,55 +2,41 @@ import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
 
 /**
- * Decodes a password that may be plain text, base64-encoded, or DPAPI-encrypted.
+ * Decodes a DPAPI-encrypted password.
  *
- * Supported formats:
- * - Plain text: "mypassword"
- * - Base64: "base64:bXlwYXNzd29yZA=="
+ * Required format:
  * - DPAPI (Windows only): "dpapi:AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA..."
  *
- * @param password - The password string to decode
- * @returns The decoded password
- * @throws Error if decoding fails
+ * @param password - The DPAPI-encrypted password string
+ * @returns The decrypted password
+ * @throws Error if password is not DPAPI-encrypted or decryption fails
  */
 export function decodePassword(password: string): string {
-  // Base64-encoded password
-  if (password.startsWith('base64:')) {
-    try {
-      const encodedPassword = password.substring(7);
-      return Buffer.from(encodedPassword, 'base64').toString('utf8');
-    } catch (error) {
-      throw new Error('Failed to decode base64 password: ' + (error instanceof Error ? error.message : 'Unknown error'));
-    }
+  // Only DPAPI-encrypted passwords are accepted
+  if (!password.startsWith('dpapi:')) {
+    throw new Error('Password must be DPAPI-encrypted. Use "npm run setup" to create encrypted credentials. Format: "dpapi:AQAAANCMnd8BFdERjHoAwE..."');
   }
 
-  // DPAPI-encrypted password (Windows only)
-  if (password.startsWith('dpapi:')) {
-    try {
-      const encryptedPassword = password.substring(6);
-      // Validate base64 format before passing to PowerShell
-      if (!/^[A-Za-z0-9+/]+=*$/.test(encryptedPassword)) {
-        throw new Error('Invalid DPAPI encrypted password format (must be base64)');
-      }
-
-      // Use PowerShell with proper escaping by validating input first
-      // Since we validated the base64 format, it's safe to use in the command
-      // Using -EncodedCommand would be more secure but requires base64 encoding of the script
-      const psCommand = `Add-Type -AssemblyName System.Security; $encrypted = [Convert]::FromBase64String('${encryptedPassword}'); $decrypted = [Security.Cryptography.ProtectedData]::Unprotect($encrypted, $null, 'CurrentUser'); [Text.Encoding]::UTF8.GetString($decrypted)`;
-
-      const decrypted = execSync(`powershell -NoProfile -NonInteractive -Command "${psCommand}"`, {
-        encoding: 'utf8',
-        windowsHide: true
-      }).trim();
-
-      return decrypted;
-    } catch (error) {
-      throw new Error('Failed to decrypt DPAPI password: ' + (error instanceof Error ? error.message : 'Unknown error'));
+  try {
+    const encryptedPassword = password.substring(6);
+    // Validate base64 format before passing to PowerShell
+    if (!/^[A-Za-z0-9+/]+=*$/.test(encryptedPassword)) {
+      throw new Error('Invalid DPAPI encrypted password format (must be base64)');
     }
-  }
 
-  // Plain text password
-  return password;
+    // Use PowerShell with proper escaping by validating input first
+    // Since we validated the base64 format, it's safe to use in the command
+    const psCommand = `Add-Type -AssemblyName System.Security; $encrypted = [Convert]::FromBase64String('${encryptedPassword}'); $decrypted = [Security.Cryptography.ProtectedData]::Unprotect($encrypted, $null, 'CurrentUser'); [Text.Encoding]::UTF8.GetString($decrypted)`;
+
+    const decrypted = execSync(`powershell -NoProfile -NonInteractive -Command "${psCommand}"`, {
+      encoding: 'utf8',
+      windowsHide: true
+    }).trim();
+
+    return decrypted;
+  } catch (error) {
+    throw new Error('Failed to decrypt DPAPI password: ' + (error instanceof Error ? error.message : 'Unknown error'));
+  }
 }
 
 /**

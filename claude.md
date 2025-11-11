@@ -24,14 +24,14 @@
 {
   "TDX_BASE_URL": "https://solutions.teamdynamix.com/TDWebApi",
   "TDX_USERNAME": "username",
-  "TDX_PASSWORD": "password",
+  "TDX_PASSWORD": "dpapi:AQAAANCMnd8BFdERjHoAwE...",
   "TDX_TICKET_APP_IDS": "129"
 }
 ```
-**Password encoding**: Passwords support multiple formats:
-- Plain text: `"TDX_PASSWORD": "mypassword"`
-- Base64-encoded: `"TDX_PASSWORD": "base64:Qm...=="`
-- DPAPI-encrypted (Windows): `"TDX_PASSWORD": "dpapi:AQAAANCMnd8BFdERjHoAwE..."`
+**Password encryption**:
+- **DPAPI encryption required** (Windows only): `"TDX_PASSWORD": "dpapi:AQAAANCMnd8BFdERjHoAwE..."`
+- Use `npm run setup` to automatically encrypt passwords
+- Passwords are tied to your Windows user account and cannot be decrypted by others
 
 **Environment variables**:
 - `TDX_PROD_CREDENTIALS_FILE`: Path to prod credentials
@@ -84,9 +84,11 @@ tdx_get_ticket({ ticketId: 789, environment: "canary" })
 - **Cache invalidation**: Ticket app ID cache cleared on any error, not just 404s
 
 ## Security
-- **Password encryption**: DPAPI passwords validated as base64 before decryption (prevents injection)
-- **Input validation**: base64 format validated with regex before PowerShell execution
-- **No command injection**: Password decryption uses stdin with validated input
+- **DPAPI encryption required**: All passwords must be DPAPI-encrypted (Windows Data Protection API)
+- **Password validation**: DPAPI encrypted data validated as base64 before decryption (prevents injection)
+- **Input validation**: Base64 format validated with regex before PowerShell execution
+- **No command injection**: Password decryption uses validated input only
+- **User-scoped**: DPAPI ties encryption to Windows user account - others cannot decrypt
 
 ## Known Issues
 - MCP server requires restart after code changes

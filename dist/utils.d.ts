@@ -1,14 +1,12 @@
 /**
- * Decodes a password that may be plain text, base64-encoded, or DPAPI-encrypted.
+ * Decodes a DPAPI-encrypted password.
  *
- * Supported formats:
- * - Plain text: "mypassword"
- * - Base64: "base64:bXlwYXNzd29yZA=="
+ * Required format:
  * - DPAPI (Windows only): "dpapi:AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA..."
  *
- * @param password - The password string to decode
- * @returns The decoded password
- * @throws Error if decoding fails
+ * @param password - The DPAPI-encrypted password string
+ * @returns The decrypted password
+ * @throws Error if password is not DPAPI-encrypted or decryption fails
  */
 export declare function decodePassword(password: string): string;
 /**

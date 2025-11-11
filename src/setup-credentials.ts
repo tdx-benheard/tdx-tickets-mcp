@@ -79,9 +79,11 @@ ${password}
 
     return `dpapi:${encrypted}`;
   } catch (error) {
-    console.error('Warning: Failed to encrypt password with DPAPI. Storing in base64 instead.');
-    console.error(error instanceof Error ? error.message : 'Unknown error');
-    return `base64:${Buffer.from(password).toString('base64')}`;
+    console.error('\n❌ Failed to encrypt password with DPAPI.');
+    console.error('Error:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('\nThis MCP server requires DPAPI encryption for security.');
+    console.error('DPAPI is only available on Windows systems.');
+    throw new Error('DPAPI encryption is required but failed. Ensure you are running on Windows.');
   }
 }
 

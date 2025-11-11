@@ -55,7 +55,7 @@ That's it! The setup wizard handles everything: dependencies, credentials, encry
    - Show current app configuration with titles (if credentials exist)
    - Authenticate and fetch available ticketing applications
    - Let you select which applications to use (marks currently selected apps with ✓)
-   - Encrypt your password (DPAPI on Windows, base64 on other platforms)
+   - Encrypt your password using Windows DPAPI (Data Protection API)
    - Ask where to configure: **Global** (all projects) or **Specific Project** (one directory)
    - Create credentials file at `~/.config/tdx-mcp/{environment}-credentials.json`
    - Configure either `~/.claude.json` (global) or project's `.mcp.json` + settings
@@ -202,10 +202,11 @@ If you prefer manual configuration:
 - Contact your TeamDynamix administrator to verify permissions
 - Try selecting "Development" environment if you have dev access
 
-### Password encryption fails (Windows)
-- The setup script will automatically fall back to base64 encoding
-- This is less secure but still encoded - consider using DPAPI-encrypted passwords manually
-- See the password format examples in the Manual Setup section
+### Password encryption fails
+- This MCP server requires Windows DPAPI encryption for security
+- Ensure you are running on a Windows system
+- DPAPI encryption is Windows-only and provides strong security by tying encryption to your user account
+- If you need to run on non-Windows systems, you'll need to modify the code to support alternative encryption methods
 
 ---
 
@@ -252,10 +253,12 @@ Claude can then use: `{ ticketId: 12345, environment: "dev" }`
 
 ## Security
 
-- Credentials stored outside project directory
+- **DPAPI Encryption Required**: All passwords must be encrypted using Windows DPAPI (Data Protection API)
+- Credentials stored outside project directory (`~/.config/tdx-mcp/`)
 - Never committed to version control
-- Supports plain text, Base64, or Windows DPAPI-encrypted passwords
+- DPAPI ties encryption to your Windows user account - passwords cannot be decrypted by other users
 - File format: `"TDX_PASSWORD": "dpapi:AQAAANCMnd8BFdERjHoAwE..."`
+- Use `npm run setup` to automatically encrypt passwords
 
 ## Development
 
