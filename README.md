@@ -2,6 +2,32 @@
 
 An MCP (Model Context Protocol) server that lets Claude Code and Claude Desktop interact with TeamDynamix Web API. Search tickets, manage users/groups, run reports, and more.
 
+## What Does This Do?
+
+This MCP server gives Claude the ability to:
+- 🎫 **Search and manage TeamDynamix tickets** - Find tickets by various criteria, get details, update status, add comments
+- 👥 **Look up users and groups** - Search for people and groups in your TeamDynamix instance
+- 📊 **Run reports** - Execute TeamDynamix reports with client-side filtering and pagination
+- 🔄 **Work across environments** - Supports production, development, and canary environments
+
+**For Claude Code users:** Once installed, you can ask Claude questions like "Show me all open tickets assigned to John Doe" or "Get details for ticket #12345" and Claude will use this MCP server to fetch the data directly from TeamDynamix.
+
+---
+
+## Claude Code Quick Setup
+
+**TL;DR for Claude Code users:**
+```bash
+git clone https://github.com/tdx-benheard/tdx-api-tickets-mcp.git
+cd tdx-api-tickets-mcp
+npm run setup
+# Follow the prompts, then restart Claude Code
+```
+
+That's it! The setup wizard handles everything: dependencies, credentials, encryption, and Claude Code configuration.
+
+---
+
 ## Quick Start
 
 ### Prerequisites
@@ -13,7 +39,7 @@ An MCP (Model Context Protocol) server that lets Claude Code and Claude Desktop 
 
 1. **Clone the repository:**
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/tdx-benheard/tdx-api-tickets-mcp.git
    cd tdx-api-tickets-mcp
    ```
 
@@ -258,4 +284,4 @@ The server uses these TeamDynamix API endpoints:
 
 ## Support
 
-For issues and feature requests, see [GitHub Issues](your-repo-url/issues).
+For issues and feature requests, see [GitHub Issues](https://github.com/tdx-benheard/tdx-api-tickets-mcp/issues).
