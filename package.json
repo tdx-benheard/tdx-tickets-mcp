@@ -8,8 +8,11 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
+    "setup": "tsx src/setup-credentials.ts",
     "test:api": "tsx src/test.ts",
-    "test:prod": "tsx src/test-prod.ts"
+    "test:prod": "tsx src/test-prod.ts",
+    "test:canary": "tsx src/test-canary.ts",
+    "test:4": "tsx src/test-4.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",

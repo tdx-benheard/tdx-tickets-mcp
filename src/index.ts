@@ -1,7 +1,5 @@
 import { readFileSync, existsSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { execSync } from 'child_process';
+import { homedir } from 'os';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -11,17 +9,12 @@ import {
 import { TDXClient } from './client.js';
 import { tools } from './tools.js';
 import { ToolHandlers } from './handlers.js';
+import { decodePassword } from './utils.js';
+import type { EnvironmentConfig } from './types.js';
 
-// Load credentials from file or environment variables
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Environment configuration structure
-interface EnvironmentConfig {
-  baseUrl: string;
-  username: string;
-  password: string;
-  appIds: string[];
+// Expand ~ to home directory
+function expandHome(path: string): string {
+  return path?.startsWith('~') ? path.replace('~', homedir()) : path;
 }
 
 // Function to load JSON credentials file
@@ -35,45 +28,29 @@ function loadCredentialsFile(filePath: string): Record<string, string> {
   }
 }
 
-// Parse environment configuration from credentials
+/**
+ * Parse environment configuration from credentials.
+ * Decodes passwords using the shared utility function.
+ */
 function parseEnvironmentConfig(credentials: Record<string, string>): EnvironmentConfig {
   const baseUrl = credentials.TDX_BASE_URL || '';
   const username = credentials.TDX_USERNAME || '';
-  let password = credentials.TDX_PASSWORD || '';
+  const password = credentials.TDX_PASSWORD || '';
   const appIdsStr = credentials.TDX_TICKET_APP_IDS || '';
 
   if (!baseUrl || !username || !password || !appIdsStr) {
     throw new Error('Missing required configuration: TDX_BASE_URL, TDX_USERNAME, TDX_PASSWORD, TDX_TICKET_APP_IDS');
   }
 
-  // Decode base64 password if prefixed with "base64:"
-  if (password.startsWith('base64:')) {
-    try {
-      const encodedPassword = password.substring(7); // Remove "base64:" prefix
-      password = Buffer.from(encodedPassword, 'base64').toString('utf8');
-      console.error('Decoded base64-encoded password');
-    } catch (error) {
-      throw new Error('Failed to decode base64 password: ' + (error instanceof Error ? error.message : 'Unknown error'));
-    }
-  }
-  // Decrypt DPAPI password if prefixed with "dpapi:"
-  else if (password.startsWith('dpapi:')) {
-    try {
-      const encryptedPassword = password.substring(6); // Remove "dpapi:" prefix
-      const psCommand = `Add-Type -AssemblyName System.Security; [Text.Encoding]::UTF8.GetString([Security.Cryptography.ProtectedData]::Unprotect([Convert]::FromBase64String('${encryptedPassword}'), $null, 'CurrentUser'))`;
-      password = execSync(`powershell -Command "${psCommand}"`, { encoding: 'utf8' }).trim();
-      console.error('Decrypted DPAPI-encrypted password');
-    } catch (error) {
-      throw new Error('Failed to decrypt DPAPI password: ' + (error instanceof Error ? error.message : 'Unknown error'));
-    }
-  }
+  // Decode password (handles plain, base64, and DPAPI formats)
+  const decodedPassword = decodePassword(password);
 
   const appIds = appIdsStr.split(',').map(id => id.trim()).filter(id => id.length > 0);
   if (appIds.length === 0) {
     throw new Error('TDX_TICKET_APP_IDS must contain at least one valid application ID');
   }
 
-  return { baseUrl, username, password, appIds };
+  return { baseUrl, username, password: decodedPassword, appIds };
 }
 
 // Load environment configurations
@@ -81,9 +58,9 @@ const environments = new Map<string, EnvironmentConfig>();
 
 // Try to load production credentials
 const prodCredsFile = process.env.TDX_PROD_CREDENTIALS_FILE;
-if (prodCredsFile && existsSync(prodCredsFile)) {
+if (prodCredsFile && existsSync(expandHome(prodCredsFile))) {
   try {
-    const prodCreds = loadCredentialsFile(prodCredsFile);
+    const prodCreds = loadCredentialsFile(expandHome(prodCredsFile));
     environments.set('prod', parseEnvironmentConfig(prodCreds));
     console.error('Loaded production environment configuration');
   } catch (error) {
@@ -93,9 +70,9 @@ if (prodCredsFile && existsSync(prodCredsFile)) {
 
 // Try to load development credentials
 const devCredsFile = process.env.TDX_DEV_CREDENTIALS_FILE;
-if (devCredsFile && existsSync(devCredsFile)) {
+if (devCredsFile && existsSync(expandHome(devCredsFile))) {
   try {
-    const devCreds = loadCredentialsFile(devCredsFile);
+    const devCreds = loadCredentialsFile(expandHome(devCredsFile));
     environments.set('dev', parseEnvironmentConfig(devCreds));
     console.error('Loaded development environment configuration');
   } catch (error) {
@@ -103,66 +80,22 @@ if (devCredsFile && existsSync(devCredsFile)) {
   }
 }
 
-// Fallback: Try legacy single credential file or .env
-if (environments.size === 0) {
-  const legacyCredsFile = process.env.TDX_CREDENTIALS_FILE;
-  let legacyConfig: EnvironmentConfig | null = null;
-
-  if (legacyCredsFile && existsSync(legacyCredsFile)) {
-    // Load from legacy credentials file
-    try {
-      const credentials = loadCredentialsFile(legacyCredsFile);
-      legacyConfig = parseEnvironmentConfig(credentials);
-      console.error('Loaded legacy credentials file (TDX_CREDENTIALS_FILE)');
-    } catch (error) {
-      console.error('Failed to load legacy credentials file:', error);
-    }
-  } else {
-    // Try .env file for backward compatibility
-    const envPath = join(__dirname, '..', '.env');
-    if (existsSync(envPath)) {
-      const envVars: Record<string, string> = {};
-      const envFile = readFileSync(envPath, 'utf8');
-
-      for (const line of envFile.split('\n')) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith('#')) continue;
-
-        const equalIndex = trimmed.indexOf('=');
-        if (equalIndex === -1) continue;
-
-        const key = trimmed.slice(0, equalIndex).trim();
-        let value = trimmed.slice(equalIndex + 1).trim();
-
-        // Remove surrounding quotes
-        if ((value.startsWith('"') && value.endsWith('"')) ||
-            (value.startsWith("'") && value.endsWith("'"))) {
-          value = value.slice(1, -1);
-        }
-
-        envVars[key] = value;
-      }
-
-      try {
-        legacyConfig = parseEnvironmentConfig(envVars);
-        console.error('Loaded legacy .env file');
-      } catch (error) {
-        console.error('Failed to parse .env file:', error);
-      }
-    }
-  }
-
-  if (legacyConfig) {
-    // Default to 'prod' for legacy single-environment setup
-    environments.set('prod', legacyConfig);
+// Try to load canary credentials
+const canaryCredsFile = process.env.TDX_CANARY_CREDENTIALS_FILE;
+if (canaryCredsFile && existsSync(expandHome(canaryCredsFile))) {
+  try {
+    const canaryCreds = loadCredentialsFile(expandHome(canaryCredsFile));
+    environments.set('canary', parseEnvironmentConfig(canaryCreds));
+    console.error('Loaded canary environment configuration');
+  } catch (error) {
+    console.error('Failed to load canary credentials:', error);
   }
 }
 
 // Ensure at least one environment is configured
 if (environments.size === 0) {
   console.error('No environment configurations found!');
-  console.error('Set TDX_PROD_CREDENTIALS_FILE and/or TDX_DEV_CREDENTIALS_FILE environment variables');
-  console.error('Or use legacy TDX_CREDENTIALS_FILE or .env file');
+  console.error('Set TDX_PROD_CREDENTIALS_FILE, TDX_DEV_CREDENTIALS_FILE, and/or TDX_CANARY_CREDENTIALS_FILE environment variables');
   process.exit(1);
 }
 
@@ -210,56 +143,56 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
-      case 'tdx_search_tickets':
-        return await handlers.handleSearchTickets(args);
-
       case 'tdx_get_ticket':
-        return await handlers.handleGetTicket(args);
+        return await handlers.handleGetTicket(args as any);
 
       case 'tdx_edit_ticket':
-        return await handlers.handleEditTicket(args);
+        return await handlers.handleEditTicket(args as any);
 
       case 'tdx_update_ticket':
-        return await handlers.handleUpdateTicket(args);
+        return await handlers.handleUpdateTicket(args as any);
 
       case 'tdx_add_ticket_feed':
-        return await handlers.handleAddTicketFeed(args);
+        return await handlers.handleAddTicketFeed(args as any);
+
+      case 'tdx_get_ticket_feed':
+        return await handlers.handleGetTicketFeed(args as any);
 
       case 'tdx_add_ticket_tags':
-        return await handlers.handleAddTicketTags(args);
+        return await handlers.handleAddTicketTags(args as any);
 
       case 'tdx_delete_ticket_tags':
-        return await handlers.handleDeleteTicketTags(args);
+        return await handlers.handleDeleteTicketTags(args as any);
 
       case 'tdx_list_reports':
-        return await handlers.handleListReports(args);
+        return await handlers.handleListReports(args as any);
 
       case 'tdx_search_reports':
-        return await handlers.handleSearchReports(args);
+        return await handlers.handleSearchReports(args as any);
 
       case 'tdx_run_report':
-        return await handlers.handleRunReport(args);
+        return await handlers.handleRunReport(args as any);
 
       case 'tdx_get_user':
-        return await handlers.handleGetUser(args);
+        return await handlers.handleGetUser(args as any);
 
       case 'tdx_get_current_user':
-        return await handlers.handleGetCurrentUser(args);
+        return await handlers.handleGetCurrentUser(args as any);
 
       case 'tdx_search_users':
-        return await handlers.handleSearchUsers(args);
+        return await handlers.handleSearchUsers(args as any);
 
       case 'tdx_get_user_uid':
-        return await handlers.handleGetUserUid(args);
+        return await handlers.handleGetUserUid(args as any);
 
       case 'tdx_search_groups':
-        return await handlers.handleSearchGroups(args);
+        return await handlers.handleSearchGroups(args as any);
 
       case 'tdx_get_group':
-        return await handlers.handleGetGroup(args);
+        return await handlers.handleGetGroup(args as any);
 
       case 'tdx_list_groups':
-        return await handlers.handleListGroups(args);
+        return await handlers.handleListGroups(args as any);
 
       default:
         throw new Error(`Unknown tool: ${name}`);
