@@ -85,6 +85,24 @@ Claude will detect existing credentials and let you:
 
 See **[SETUP-GUIDE.md](./SETUP-GUIDE.md#updating-configuration)** for detailed update scenarios.
 
+## Using in Multiple Projects
+
+Your MCP server configuration is **portable and reusable**:
+
+- **Credentials are global**: Stored in `~/.config/tdx-mcp/`, shared across all projects
+- **`.mcp.json` is portable**: Copy it to any project where you want the MCP server
+- **Easy to make global**: Move config to `~/.claude.json` to enable everywhere
+
+**To add to another project:**
+1. Copy `.mcp.json` to the new project
+2. Update the `args` path to absolute path: `"args": ["C:/full/path/to/dist/index.js"]`
+3. Restart Claude Code
+
+**To make globally available:**
+> Ask Claude: "Make my TeamDynamix MCP server globally available"
+
+See **[SETUP-GUIDE.md](./SETUP-GUIDE.md#using-in-multiple-projects)** for more details.
+
 ---
 
 ## Troubleshooting

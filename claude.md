@@ -327,35 +327,61 @@ Next steps:
 
 ## Updating Existing Configuration
 
-If user asks to update/modify existing setup:
+If user asks to update/modify existing setup OR show current configuration:
 
 1. **Detect existing credentials**:
    ```bash
    ls "$HOME/.config/tdx-mcp/"
    ```
 
-2. **Show current config**:
+2. **Check for local MCP configuration**:
+   ```bash
+   test -f .mcp.json && echo "✓ Local .mcp.json exists (project-specific)" || echo "✗ No local .mcp.json"
+   test -f "$HOME/.claude.json" && echo "✓ Global .claude.json may exist" || echo "✗ No global config"
+   ```
+
+3. **Show current credentials**:
    ```bash
    cat "$HOME/.config/tdx-mcp/${environment}-credentials.json"
    ```
 
-3. **Ask what to update**:
+4. **Display status to user**:
    ```
-   Current configuration found for 'prod':
-     • URL: https://solutions.teamdynamix.com/TDWebApi
-     • Username: john.doe@company.com
-     • App IDs: 129, 245
+   Your Current Configuration:
 
-   What would you like to update?
+   Credentials (global - shared across projects):
+     • Production: username@domain.com → App 129 → solutions.teamdynamix.com
+     • Development: username → App 627 → localhost/TDDev
+     • Canary: username → App 627 → eng.teamdynamixcanary.com
+
+   MCP Server Configuration:
+     ✓ Project-specific (.mcp.json exists in this project)
+       - Ready to copy to other projects
+       - Update 'args' path to absolute when copying
+       - Or make global by moving to ~/.claude.json
+
+   Next Steps:
+     • Copy .mcp.json to another project
+     • Make globally available in all projects
+     • Keep project-specific
+   ```
+
+5. **Ask what to update** (if user wants to modify):
+   ```
+   What would you like to do?
    [1] Change credentials (username/password)
    [2] Modify application selection
-   [3] Change environment settings
-   [4] Add new environment (dev/canary)
+   [3] Add new environment (dev/canary)
+   [4] Copy .mcp.json to another project
+   [5] Make MCP server globally available
 
-   Select option (1-4):
+   Select option (1-5):
    ```
 
-4. **Apply updates** and re-save credentials file
+6. **Apply updates** based on selection:
+   - Options 1-3: Update credential files
+   - Option 4: Help copy `.mcp.json` to another project (update paths)
+   - Option 5: Move config to `~/.claude.json`
 
 ---
 

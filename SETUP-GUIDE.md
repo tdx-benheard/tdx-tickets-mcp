@@ -266,11 +266,52 @@ When updating:
 
 After setup completes, you'll have:
 
-1. **Credentials file**: `~/.config/tdx-mcp/{environment}-credentials.json`
-2. **MCP configuration**: Either `~/.claude.json` (global) or project's `.mcp.json`
-3. **Claude settings**: `.claude/settings.local.json` (if project-specific)
+### **1. Credentials** (Global - Shared Across Projects)
+- **Location**: `~/.config/tdx-mcp/{environment}-credentials.json`
+- **Contains**: URL, username, encrypted password, app IDs
+- **Shared**: These credentials can be used by multiple projects
+- **Security**: All passwords are DPAPI-encrypted
 
-All passwords are DPAPI-encrypted for security.
+### **2. MCP Server Configuration** (Portable)
+
+**Option A: Project-Specific** (`.mcp.json` in project root)
+- **Ready to copy**: This file can be copied to other projects
+- **Portable**: Just update the `args` path to point to `dist/index.js` (absolute path)
+- **Use in other projects**:
+  ```bash
+  cp .mcp.json /path/to/another-project/.mcp.json
+  # Edit and update the path in args to absolute path
+  ```
+
+**Option B: Global** (`~/.claude.json`)
+- **Available everywhere**: MCP server works in all Claude Code projects
+- **Single configuration**: One place to manage the server
+
+### **3. Claude Settings** (if project-specific)
+- **Location**: `.claude/settings.local.json`
+- **Contains**: `"enableAllProjectMcpServers": true`
+
+---
+
+## Using in Multiple Projects
+
+Your setup is **portable and reusable**:
+
+1. **Credentials are global** - Stored in `~/.config/tdx-mcp/`, shared across all projects
+2. **`.mcp.json` is portable** - Copy it to any project where you want the MCP server
+3. **Easy to make global** - Move config to `~/.claude.json` to enable everywhere
+
+**To add to another project:**
+```bash
+# Copy the .mcp.json to new project
+cp .mcp.json /path/to/another-project/
+
+# Edit the new .mcp.json and update args to absolute path:
+# "args": ["C:/source/MCP/tdx-api-tickets-mcp/dist/index.js"]
+```
+
+**To make global (available in all projects):**
+> Ask Claude: "Make my TeamDynamix MCP server globally available"
 
 ## Need Help?
 
