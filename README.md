@@ -58,6 +58,7 @@ Once installed, ask Claude: *"Show me all open tickets assigned to John Doe"* or
 - Credentials stored in `~/.config/tdx-mcp/` (outside project directory)
 - DPAPI ties encryption to your Windows user account - others cannot decrypt
 - Password format: `"TDX_PASSWORD": "dpapi:AQAAANCMnd8BFdERjHoAwE..."`
+- **Encryption tool**: Run `npm run encrypt-password` for secure password entry (never visible in chat)
 
 ---
 

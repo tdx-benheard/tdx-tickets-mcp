@@ -90,11 +90,12 @@ Option 1: Enter password in this chat (will be visible in chat history)
   • Only visible in your Claude Code chat history
   • Type 'chat' to use this option
 
-Option 2: Use password encryption tool (more secure)
+Option 2: Use password encryption tool (RECOMMENDED - more secure)
   • Your password never appears in chat
-  • Run: powershell -ExecutionPolicy Bypass -File scripts/encrypt-password.ps1
-  • Tool will prompt for password securely and output encrypted value
-  • Paste the encrypted value (starting with 'dpapi:') here
+  • Run: npm run encrypt-password
+  • Tool will prompt for password securely (masked as ***)
+  • Only encrypted value is output (starting with 'dpapi:')
+  • Paste the encrypted value here
   • Type 'tool' to use this option
 
 Which option do you prefer? (chat/tool)
@@ -102,13 +103,17 @@ Which option do you prefer? (chat/tool)
 
 **If user chooses 'chat'**:
 - Ask: `Enter your TeamDynamix password (will be encrypted immediately):`
-- Immediately encrypt it (see password encryption section below)
+- Immediately encrypt it using PowerShell DPAPI command
 - Do NOT echo the password back
 
 **If user chooses 'tool'**:
-- Tell them to run: `powershell -ExecutionPolicy Bypass -File scripts/encrypt-password.ps1`
+- Tell them to run: `npm run encrypt-password`
+- User enters password in their terminal (masked)
 - Ask: `Paste the encrypted password (starting with 'dpapi:'):`
 - Validate it starts with 'dpapi:'
+
+**Alternative tool** (if npm not available):
+- PowerShell: `powershell -ExecutionPolicy Bypass -File scripts/encrypt-password.ps1`
 
 ### Step 2: Validate Credentials
 

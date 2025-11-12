@@ -8,12 +8,14 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
+    "encrypt-password": "tsx scripts/encrypt-password.ts",
     "test:api": "tsx src/test.ts",
     "test:prod": "tsx src/test-prod.ts",
     "test:canary": "tsx src/test-canary.ts",
     "test:4": "tsx src/test-4.ts"
   },
   "dependencies": {
+    "@inquirer/prompts": "^7.0.1",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "axios": "^1.7.0"
   },

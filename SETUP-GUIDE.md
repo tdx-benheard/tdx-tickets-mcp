@@ -64,11 +64,12 @@ Option 1: Enter password in this chat (will be visible in chat history)
   • Only visible in your Claude Code chat history
   • Type 'chat' to use this option
 
-Option 2: Use password encryption tool (more secure - RECOMMENDED)
+Option 2: Use password encryption tool (RECOMMENDED - more secure)
   • Your password never appears in chat
-  • Run: powershell -ExecutionPolicy Bypass -File scripts/encrypt-password.ps1
-  • Tool will prompt for password securely and output encrypted value
-  • Paste the encrypted value (starting with 'dpapi:') here
+  • Run: npm run encrypt-password
+  • Tool will prompt for password securely (masked as ***)
+  • Only encrypted value is output (starting with 'dpapi:')
+  • Paste the encrypted value here
   • Type 'tool' to use this option
 
 Which option do you prefer? (chat/tool)
@@ -78,7 +79,12 @@ Which option do you prefer? (chat/tool)
 - Passwords entered in chat are visible in your chat history
 - Once encrypted with DPAPI, passwords can only be decrypted by your Windows user account
 - Encrypted passwords are stored in `~/.config/tdx-mcp/` (outside version control)
-- The encryption tool (`scripts/encrypt-password.ps1`) never exposes your password
+- The encryption tool (`npm run encrypt-password`) never exposes your password - only the encrypted result
+
+**Alternative encryption tool** (if you prefer PowerShell):
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/encrypt-password.ps1
+```
 
 ### Step 2: Validate Credentials
 
