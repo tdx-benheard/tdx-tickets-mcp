@@ -27,16 +27,17 @@ pwd  # Store as MCP_SERVER_PATH (convert /c/... to C:\... if needed)
 ### 2. Run Setup Tool
 Tell user (use EXACT text, do NOT add explanations):
 
-Now please run the interactive setup tool by pasting the below commands in a SEPARATE terminal window:
+🚀 ACTION NEEDED:
+   ↓ Copy these commands
+   ↓ Open a NEW terminal window
+   ↓ Paste and run
 
-```
---------------------
-cd {MCP_SERVER_PATH}
-npm run setup
---------------------
-```
+   ────────────────────────────────────
+   cd {MCP_SERVER_PATH}
+   npm run setup
+   ────────────────────────────────────
 
-When complete, return here and say: "complete"
+✅ When done, return here and say: "complete"
 
 Replace `{MCP_SERVER_PATH}` with the path from step 1.
 

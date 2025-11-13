@@ -46,6 +46,8 @@ console.log('  2. Test authentication with TeamDynamix');
 console.log('  3. Discover available ticketing applications');
 console.log('  4. Save credentials to ~/.config/tdx-mcp/');
 console.log('');
+console.log('ℹ️  If prompts don\'t respond, click this window to give it focus');
+console.log('');
 
 async function main() {
   try {
@@ -206,20 +208,25 @@ async function main() {
       } else {
         // Multiple apps: Show checkbox
         console.log(`\n✓ Found ${ticketingApps.length} ticketing application(s)\n`);
+        console.log('ℹ️  Use SPACE to select, arrow keys (↑/↓) to navigate, ENTER when done\n');
 
-        const selectedApps = await checkbox({
-          message: 'Select ticketing applications to connect',
-          choices: ticketingApps.map((app: any) => ({
-            name: `${app.Name} (ID: ${app.AppID})`,
-            value: app.AppID.toString(),
-            checked: false,
-          })),
-          pageSize: 20,
-        });
+        let selectedApps: string[] = [];
+        while (selectedApps.length === 0) {
+          selectedApps = await checkbox({
+            message: 'Select ticketing applications to connect',
+            choices: ticketingApps.map((app: any) => ({
+              name: `${app.Name} (ID: ${app.AppID})`,
+              value: app.AppID.toString(),
+              checked: false,
+            })),
+            pageSize: 20,
+          });
 
-        if (selectedApps.length === 0) {
-          console.error('\n✗ You must select at least one application');
-          process.exit(1);
+          if (selectedApps.length === 0) {
+            console.error('\n❌ No applications selected!');
+            console.log('   ℹ️  You must select at least one application');
+            console.log('   ℹ️  Use SPACE to select, then press ENTER\n');
+          }
         }
 
         selectedAppIds = selectedApps.join(',');
