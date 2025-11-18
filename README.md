@@ -24,9 +24,8 @@ Once installed, ask Claude: *"Show me all open tickets assigned to John Doe"* or
 
 ### Installation
 
-1. **Clone the repository:**
+1. **Navigate to the server directory:**
    ```bash
-   git clone https://github.com/tdx-benheard/tdx-api-tickets-mcp.git
    cd tdx-api-tickets-mcp
    ```
 
@@ -158,7 +157,3 @@ npm run test:prod  # Test prod environment
 ## License
 
 [Your License Here]
-
-## Support
-
-For issues and feature requests, see [GitHub Issues](https://github.com/tdx-benheard/tdx-api-tickets-mcp/issues).
