@@ -84,6 +84,11 @@ export class TDXClient {
       async (error) => {
         const originalRequest = error.config;
 
+        // If there's no config, we can't retry
+        if (!originalRequest) {
+          return Promise.reject(error);
+        }
+
         // Prevent infinite retry loop
         if (originalRequest._retryCount === undefined) {
           originalRequest._retryCount = 0;
@@ -306,7 +311,16 @@ export class TDXClient {
    */
   async deleteTicketTags(ticketId: number, tags: string[], appIdOverride?: string): Promise<void> {
     const appId = await this.getAppIdForTicket(ticketId, appIdOverride);
-    await this.client.delete(`/api/${appId}/tickets/${ticketId}/tags`, { data: tags });
+    try {
+      await this.client.delete(`/api/${appId}/tickets/${ticketId}/tags`, { data: tags });
+    } catch (error) {
+      // 304 Not Modified means the tags don't exist on the ticket (nothing to delete)
+      // This is a success case - the desired end state is achieved (tags are not on the ticket)
+      if (axios.isAxiosError(error) && error.response?.status === 304) {
+        return;
+      }
+      throw error;
+    }
   }
 
   /**

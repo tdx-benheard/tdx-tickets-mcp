@@ -121,8 +121,56 @@ Example filtered attribute:
 
 ---
 
+### `tdx_edit_ticket`
+Full ticket update (requires all mandatory fields). Use this when you need to update fields not supported by `tdx_update_ticket`, such as group assignment.
+
+**Parameters:**
+- `ticketId` (number, required)
+- `ticketData` (object, required) - Complete ticket data object with all mandatory fields
+- `appId` (string, optional)
+- `environment` (string, optional)
+
+**Mandatory fields in ticketData:**
+- `ID`, `TypeID`, `Classification`, `FormID`, `Title`, `Description`, `IsRichHtml`
+- `AccountID`, `StatusID`, `PriorityID`, `RequestorUid`, `ServiceID`, `AppID`
+
+**Group Assignment:**
+To assign a ticket to a group instead of an individual:
+- Set `ResponsibleGroupID` to the group ID
+- Set `ResponsibleUid` to `null`
+
+**Example:**
+```javascript
+// First, get the full ticket to use as a base
+tdx_get_ticket({ ticketId: 29290570 })
+
+// Then edit with modified fields
+tdx_edit_ticket({
+  ticketId: 29290570,
+  ticketData: {
+    ID: 29290570,
+    TypeID: 155,
+    Classification: 33,
+    FormID: 12327,
+    Title: "Error page in dark mode",
+    Description: "...",
+    IsRichHtml: true,
+    AccountID: 16,
+    StatusID: 5,
+    PriorityID: 8,
+    RequestorUid: "5ec7a897-1405-ec11-b563-0050f2eef4a7",
+    ResponsibleUid: null,  // Clear individual assignment
+    ResponsibleGroupID: 23627,  // Assign to group
+    ServiceID: 2147,
+    AppID: 129
+  }
+})
+```
+
+---
+
 ### `tdx_update_ticket`
-Partial ticket update (only specify fields to change).
+Partial ticket update (only specify fields to change). This is the preferred method for most updates.
 
 **Parameters:**
 - `ticketId` (number, required)
@@ -131,10 +179,12 @@ Partial ticket update (only specify fields to change).
 - `title` (string)
 - `description` (string)
 - `comments` (string)
-- `responsibleUid` (string)
+- `responsibleUid` (string) - Assign to individual user
 - `tags` (string[])
 - `appId` (string, optional)
 - `environment` (string, optional)
+
+**Note:** This tool only supports assigning to individual users via `responsibleUid`. To assign to a group instead, use `tdx_edit_ticket` with `ResponsibleGroupID` and `ResponsibleUid: null`.
 
 ---
 
