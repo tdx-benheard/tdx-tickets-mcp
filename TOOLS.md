@@ -21,7 +21,7 @@ tdx_search_reports({ searchText: "open tickets" })
 tdx_run_report({
   reportId: 279612,  // From step 1
   withData: true,
-  filterResponsibleFullName: "Sara McCormick",
+  filterResponsibleFullName: "Ben Heard",
   page: 1,
   pageSize: 50
 })
@@ -155,7 +155,7 @@ tdx_run_report({
 tdx_run_report({
   reportId: 273426,
   withData: true,
-  filterResponsibleFullName: "Sara McCormick",
+  filterResponsibleFullName: "Ben Heard",
   filterStatusName: "Open",
   page: 1,
   pageSize: 50
@@ -325,7 +325,7 @@ tdx_search_reports({ searchText: "open tickets" })
 tdx_run_report({
   reportId: 273426,  // ID from step 1
   withData: true,
-  filterResponsibleFullName: "Sara McCormick",
+  filterResponsibleFullName: "Ben Heard",
   page: 1,
   pageSize: 50
 })
@@ -344,7 +344,7 @@ tdx_get_ticket({ ticketId: 28803790 })
 
 **Decision Tree:**
 - User asks to "find/search/list tickets" → Use `tdx_search_reports` + `tdx_run_report` with filters
-- User asks "show me Sara's tickets" → Use reports with `filterResponsibleFullName`
+- User asks "show me Ben's tickets" → Use reports with `filterResponsibleFullName`
 - User asks "get ticket details for #12345" → Use `tdx_get_ticket`
 - User has ticket ID from report and needs full details → Use `tdx_get_ticket`
 
@@ -371,7 +371,7 @@ while (hasMore) {
   const response = tdx_run_report({
     reportId: 273426,
     withData: true,
-    filterResponsibleFullName: "Sara",
+    filterResponsibleFullName: "Ben Heard",
     page: currentPage,
     pageSize: 50
   });
