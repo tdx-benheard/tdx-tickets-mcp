@@ -2,11 +2,21 @@
 
 **IMPORTANT:** Overrides base CLAUDE.md. Authoritative build documentation.
 
+## MSBuild Path
+```
+C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MSBuild.exe
+```
+
+## Solution/Project File Locations
+- **Full solution:** `Monorepo.sln` (in parent directory of `enterprise/`)
+- **Web projects:** `enterprise/TDNext/TDNext.csproj`, `enterprise/TDClient/TDClient.csproj`, etc.
+- **Shared libraries:** `enterprise/../objects/TeamDynamix.Domain/TeamDynamix.Domain.csproj`, etc.
+- **Work Management:** `enterprise/TDWorkManagement/TDWorkManagement.csproj`
+
 ## Full Solution Build
 ```bash
-# From parent dir of enterprise (where Monorepo.sln is)
-cd ..
-powershell "& '{MSBUILD_PATH}' Monorepo.sln /t:Build /p:Configuration=Debug /m /v:minimal"
+# From enterprise dir - navigate to parent first (where Monorepo.sln is)
+cd .. && powershell -Command "& 'C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MSBuild.exe' Monorepo.sln /t:Build /p:Configuration=Debug /m /v:minimal"
 ```
 - `/m` = parallel, `/v:minimal` = errors/warnings only
 - Takes 5-10min cold, 1-3min incremental
@@ -16,12 +26,18 @@ powershell "& '{MSBUILD_PATH}' Monorepo.sln /t:Build /p:Configuration=Debug /m /
 
 **IMPORTANT:** Only build the specific project(s) you modified to save time and resources.
 
+**🚨 ALWAYS ASK USER FIRST:** Before building, ask the user which approach they prefer:
+1. Build only the specific changed project(s)
+2. Build the full solution
+
+**Exception:** If user explicitly says "build the solution", proceed directly with full solution build without asking.
+
 **Examples:**
 - Changed `TDClient` controller → Build only `TDClient\TDClient.csproj`
 - Changed `TDNext` page → Build only `TDNext\TDNext.csproj`
-- Changed shared `TeamDynamix.Domain` code → Build full solution (dependencies)
+- Changed shared `TeamDynamix.Domain` code → **Ask user** if they want full solution or just the changed project + specific app
 
-**When to build full solution:**
+**When full solution might be needed:**
 - Changes to shared libraries (`objects/TeamDynamix.*`)
 - Database schema changes (`TeamDynamixDB`)
 - Unsure of dependencies
@@ -31,12 +47,14 @@ powershell "& '{MSBUILD_PATH}' Monorepo.sln /t:Build /p:Configuration=Debug /m /
 **When to build single project:**
 - Changes isolated to one application (TDClient, TDNext, TDAdmin, etc.)
 - UI-only changes (controllers, views, scripts)
+- Shared library changes (user can specify which apps need the updated DLL)
 
 ## Web Forms Projects (TDNext/TDAdmin/TDClient)
 ```bash
 # From enterprise dir - must use MSBuild via PowerShell (bash breaks / switches)
-powershell -Command "& '{MSBUILD_PATH}' TDNext\TDNext.csproj /t:Build /p:Configuration=Debug"
+powershell -Command "& 'C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MSBuild.exe' TDNext\TDNext.csproj /t:Build /p:Configuration=Debug"
 ```
+**CRITICAL:** Must wrap in `powershell -Command` with single quotes around path. Direct bash invocation strips `/t:` and `/p:` switches.
 
 ## TDWorkManagement (ASP.NET Core + TypeScript + Vue)
 ```bash
@@ -64,6 +82,12 @@ powershell -Command "iex ((New-Object System.Net.WebClient).DownloadString('http
 del /f TDWorkManagement\node_modules\tdworkmanagement.timestamp
 del /f TDWorkManagement\VueLibrarySource\node_modules\vuelibrarysource.timestamp
 ```
+
+## Post-Build Pre-warming
+
+**See [prewarm.md](prewarm.md) for automatic application pre-warming after builds.**
+
+After building web projects, automatically pre-warm the built applications to avoid slow first-request times.
 
 ## Prerequisites
 - .NET 8.0 SDK

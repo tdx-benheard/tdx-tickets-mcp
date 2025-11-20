@@ -24,7 +24,9 @@ git log --format="%ai | %h | %s" --no-merges origin/feature/{USERNAME}/{BRANCH_N
 **IMPORTANT:** Show user commits list, get confirmation before proceeding
 
 ## Step 2: Ask Checkout Method
-**"Direct checkout (changes current directory) or worktree (separate directory)?"**
+**"Do you want to create a worktree for the cherry pick?"**
+1. Create worktree
+2. Use current directory
 
 ## Step 3: Create Branch & Cherry-Pick
 Branch naming: `feature/{USERNAME}/{NAME}_{RELEASE_VERSION}` (remove `#` chars)
@@ -81,4 +83,4 @@ Merge conflicts:
 Skipped commits:
 [hash] - [message] - Reason: [why]
 ```
-**Output as copyable text. Ask if user wants saved to `.claude/temp/PR_Message-{BRANCH_NAME}.txt`**
+**Output as copyable text. Ask if user wants saved to `.claude/temp/CP_PR_Message-{BRANCH_NAME}.txt`**
