@@ -93,6 +93,11 @@ export const tools: Tool[] = [
           type: 'string',
           description: 'Responsible user UID',
         },
+        tags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Tags (not supported - use tdx_add_ticket_tags or tdx_delete_ticket_tags)',
+        },
         ...appIdParam,
       },
       required: ['ticketId'],

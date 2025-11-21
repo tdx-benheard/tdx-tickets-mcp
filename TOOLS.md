@@ -193,7 +193,9 @@ tdx_update_ticket({
 })
 ```
 
-**Note:** This tool only supports assigning to individual users. To assign to a group, use `tdx_edit_ticket` with `ResponsibleGroupID`.
+**Notes:**
+- This tool only supports assigning to individual users. To assign to a group, use `tdx_edit_ticket` with `ResponsibleGroupID`.
+- **Tag operations are not supported.** Use `tdx_add_ticket_tags` to add tags or `tdx_delete_ticket_tags` to remove tags.
 
 ---
 

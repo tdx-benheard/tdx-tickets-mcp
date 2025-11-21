@@ -414,6 +414,7 @@ export interface UpdateTicketArgs extends ToolArgs {
   description?: string;
   comments?: string;
   responsibleUid?: string;
+  tags?: string[];
 }
 
 export interface AddTicketFeedArgs extends ToolArgs {

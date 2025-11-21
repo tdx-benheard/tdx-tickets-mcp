@@ -117,6 +117,14 @@ export class ToolHandlers {
       throw new Error('ticketId is required');
     }
 
+    // Detect tag operations and provide helpful error
+    if (args.tags !== undefined) {
+      throw new Error(
+        'Tag operations are not supported in tdx_update_ticket. ' +
+        'Use tdx_add_ticket_tags to add tags or tdx_delete_ticket_tags to remove tags.'
+      );
+    }
+
     const updateData: any = {};
 
     if (args.statusId !== undefined) updateData.StatusID = args.statusId;
