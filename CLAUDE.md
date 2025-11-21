@@ -2,6 +2,16 @@
 
 > **For detailed tool usage:** [TOOLS.md](./TOOLS.md)
 
+## Git Commit Guidelines
+
+**Before committing:**
+1. Ask user for approval
+2. Offer code review: "Would you like me to review for errors, risks, redundancies, and inefficiencies?"
+3. If yes: analyze and present findings
+4. Show git diff summary and wait for confirmation
+
+---
+
 ## Quick Reference
 
 **Environments:**
@@ -110,7 +120,7 @@ Tools return helpful errors when credentials unavailable.
 ## Key Behaviors
 
 **Ticket Updates:**
-- `tdx_update_ticket`: Partial (auto-merges)
+- `tdx_update_ticket`: Partial (auto-merges), returns filtered ticket details. Set `responsibleUid` to `""` to unassign.
 - `tdx_edit_ticket`: Full (all mandatory fields required)
 
 **Reports:**

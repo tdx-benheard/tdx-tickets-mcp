@@ -63,7 +63,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'tdx_update_ticket',
-    description: 'Update ticket (partial update)',
+    description: 'Update ticket (partial update). To unassign a ticket, set responsibleUid to empty string ("").',
     inputSchema: {
       type: 'object',
       properties: {

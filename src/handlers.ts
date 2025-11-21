@@ -124,14 +124,19 @@ export class ToolHandlers {
     if (args.title) updateData.Title = args.title;
     if (args.description) updateData.Description = args.description;
     if (args.comments) updateData.Comments = args.comments;
-    if (args.responsibleUid) updateData.ResponsibleUid = args.responsibleUid;
+    // Allow empty string to unassign ticket
+    if (args.responsibleUid !== undefined) updateData.ResponsibleUid = args.responsibleUid;
 
     const result = await client.updateTicket(args.ticketId, updateData, args?.appId);
+
+    // Filter out bloated attribute choice data and return updated ticket details
+    const filteredTicket = this.filterTicketAttributes(result);
+
     return {
       content: [
         {
           type: 'text',
-          text: `Ticket #${result.ID} "${result.Title}" updated successfully.`,
+          text: `Ticket #${result.ID} "${result.Title}" updated successfully.\n\nUpdated ticket details:\n${JSON.stringify(filteredTicket, null, 2)}`,
         },
       ],
     };

@@ -170,7 +170,7 @@ tdx_edit_ticket({
 ---
 
 ### `tdx_update_ticket`
-Partial ticket update (only specify fields to change). This is the preferred method for most updates.
+Partial ticket update (only specify fields to change). This is the preferred method for most updates. **Returns the updated ticket details with filtered attributes.**
 
 **Parameters:**
 - `ticketId` (number, required)
@@ -179,12 +179,21 @@ Partial ticket update (only specify fields to change). This is the preferred met
 - `title` (string)
 - `description` (string)
 - `comments` (string)
-- `responsibleUid` (string) - Assign to individual user
-- `tags` (string[])
+- `responsibleUid` (string) - Assign to individual user, or set to `""` (empty string) to unassign
 - `appId` (string, optional)
 - `environment` (string, optional)
 
-**Note:** This tool only supports assigning to individual users via `responsibleUid`. To assign to a group instead, use `tdx_edit_ticket` with `ResponsibleGroupID` and `ResponsibleUid: null`.
+**Unassigning a Ticket:**
+To remove the responsible user from a ticket, set `responsibleUid` to an empty string:
+```javascript
+tdx_update_ticket({
+  ticketId: 29290570,
+  responsibleUid: "",
+  comments: "Unassigning for reassignment"
+})
+```
+
+**Note:** This tool only supports assigning to individual users. To assign to a group, use `tdx_edit_ticket` with `ResponsibleGroupID`.
 
 ---
 
